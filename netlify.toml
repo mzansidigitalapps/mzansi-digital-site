@@ -1,0 +1,6 @@
+[functions]
+  directory = "netlify/functions"
+
+[[scheduled.functions]]
+  name = "dailyUpdate"
+  schedule = "0 6,18 * * *"
