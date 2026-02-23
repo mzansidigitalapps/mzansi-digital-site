@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mzansi Snake | MzansiDigitalApps</title>
+
+<style>
+body {
+    margin:0;
+    background: radial-gradient(circle at top, #0f2027, #0b0c10);
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    text-align:center;
+}
+
+header {
+    padding:15px;
+    font-size:22px;
+    font-weight:bold;
+    letter-spacing:1px;
+    background: linear-gradient(90deg,#FFD700,#C19A6B);
+    color:#000;
+}
+
+canvas {
+    background:#111;
+    border:3px solid #FFD700;
+    margin-top:10px;
+}
+
+#scoreboard {
+    margin-top:10px;
+    font-size:18px;
+}
+
+.button {
+    background:#FFD700;
+    color:#000;
+    padding:10px 20px;
+    border:none;
+    border-radius:5px;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+#ad-slot {
+    margin-top:15px;
+    background:#1a1a1a;
+    padding:10px;
+    border:1px solid #333;
+    font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+Mzansi Snake 🐍 | Earn MzansiPoints
+</header>
+
+<canvas id="game" width="300" height="300"></canvas>
+
+<div id="scoreboard">
+Score: <span id="score">0</span> |
+MzansiPoints: <span id="points">0</span>
+</div>
+
+<button class="button" onclick="restart()">Restart</button>
+
+<div id="ad-slot">
+Ad Space (Integrate AdSense / Ad Script Here)
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let box = 15;
+let snake = [{x:150,y:150}];
+let food = {
+    x: Math.floor(Math.random()*20)*box,
+    y: Math.floor(Math.random()*20)*box
+};
+
+let score = 0;
+let points = 0;
+let direction;
+
+document.addEventListener("keydown", directionControl);
+
+function directionControl(event){
+    if(event.keyCode == 37 && direction != "RIGHT") direction = "LEFT";
+    else if(event.keyCode == 38 && direction != "DOWN") direction = "UP";
+    else if(event.keyCode == 39 && direction != "LEFT") direction = "RIGHT";
+    else if(event.keyCode == 40 && direction != "UP") direction = "DOWN";
+}
+
+function draw(){
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0,0,300,300);
+
+    for(let i=0;i<snake.length;i++){
+        ctx.fillStyle = i==0 ? "#FFD700" : "#4CAF50";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    ctx.fillStyle = "#C19A6B";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    if(direction=="LEFT") snakeX -= box;
+    if(direction=="UP") snakeY -= box;
+    if(direction=="RIGHT") snakeX += box;
+    if(direction=="DOWN") snakeY += box;
+
+    if(snakeX==food.x && snakeY==food.y){
+        score++;
+        points += 10;
+        document.getElementById("score").innerHTML = score;
+        document.getElementById("points").innerHTML = points;
+
+        food = {
+            x: Math.floor(Math.random()*20)*box,
+            y: Math.floor(Math.random()*20)*box
+        };
+    } else {
+        snake.pop();
+    }
+
+    let newHead = {x:snakeX, y:snakeY};
+
+    if(snakeX<0 || snakeX>=300 || snakeY<0 || snakeY>=300 || collision(newHead,snake)){
+        clearInterval(game);
+        alert("Game Over! You earned " + points + " MzansiPoints.");
+    }
+
+    snake.unshift(newHead);
+}
+
+function collision(head,array){
+    for(let i=0;i<array.length;i++){
+        if(head.x==array[i].x && head.y==array[i].y){
+            return true;
+        }
+    }
+    return false;
+}
+
+function restart(){
+    location.reload();
+}
+
+let game = setInterval(draw,120);
+</script>
+
+</body>
+</html>
