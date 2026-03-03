@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mzansi Pong</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      background: black;
+      display: block;
+      margin: 20px auto;
+      border: 4px solid #16a34a;
+    }
+    h1 {
+      color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Mzansi Pong 🇿🇦</h1>
+<canvas id="game" width="600" height="400"></canvas>
+<p>First to 5 wins!</p>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let ballX = 300;
+let ballY = 200;
+let ballSpeedX = 4;
+let ballSpeedY = 4;
+let paddleHeight = 80;
+let playerY = 160;
+let aiY = 160;
+let playerScore = 0;
+let aiScore = 0;
+
+canvas.addEventListener("mousemove", function(evt) {
+  let rect = canvas.getBoundingClientRect();
+  playerY = evt.clientY - rect.top - paddleHeight/2;
+});
+
+function drawRect(x,y,w,h,color){
+  ctx.fillStyle = color;
+  ctx.fillRect(x,y,w,h);
+}
+
+function drawBall(){
+  ctx.fillStyle = "#16a34a";
+  ctx.beginPath();
+  ctx.arc(ballX, ballY, 8, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawText(text,x,y){
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText(text,x,y);
+}
+
+function moveBall(){
+  ballX += ballSpeedX;
+  ballY += ballSpeedY;
+
+  if(ballY < 0 || ballY > canvas.height){
+    ballSpeedY = -ballSpeedY;
+  }
+
+  if(ballX < 10){
+    if(ballY > playerY && ballY < playerY + paddleHeight){
+      ballSpeedX = -ballSpeedX;
+    } else {
+      aiScore++;
+      resetBall();
+    }
+  }
+
+  if(ballX > canvas.width - 10){
+    if(ballY > aiY && ballY < aiY + paddleHeight){
+      ballSpeedX = -ballSpeedX;
+    } else {
+      playerScore++;
+      resetBall();
+    }
+  }
+
+  aiY += ((ballY - (aiY + paddleHeight/2)))*0.05;
+}
+
+function resetBall(){
+  ballX = 300;
+  ballY = 200;
+  ballSpeedX = -ballSpeedX;
+}
+
+function draw(){
+  drawRect(0,0,canvas.width,canvas.height,"black");
+  drawRect(0,playerY,10,paddleHeight,"white");
+  drawRect(canvas.width-10,aiY,10,paddleHeight,"white");
+  drawBall();
+  drawText("You: " + playerScore,100,30);
+  drawText("AI: " + aiScore,450,30);
+}
+
+function gameLoop(){
+  moveBall();
+  draw();
+}
+
+setInterval(gameLoop,1000/60);
+</script>
+
+</body>
+</html>
