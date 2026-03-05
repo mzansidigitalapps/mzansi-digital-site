@@ -52,11 +52,29 @@ margin-top:20px;
 
 <script>
 // 🔐 REPLACE WITH YOUR mzansi-core CONFIG
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script>
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_AUTH",
-  projectId: "mzansi-core",
+  apiKey: "AIzaSyD6GRgZn-vW8ZwYw3t6twHwmLezU7ybEqE",
+  authDomain: "mzansiverse-core.firebaseapp.com",
+  projectId: "mzansiverse-core",
+  storageBucket: "mzansiverse-core.firebasestorage.app",
+  messagingSenderId: "421683817678",
+  appId: "1:421683817678:web:e7ce9521e9cbe01821349f"
 };
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// anonymous login
+auth.signInAnonymously().catch(console.error);
+</script>
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
