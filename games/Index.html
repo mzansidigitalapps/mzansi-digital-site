@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MzansiVerse Games</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#0057b7,#ffcc00);
+    color:white;
+    text-align:center;
+}
+h1{
+    padding:30px 10px;
+    font-size:2.2em;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    padding:20px;
+}
+.card{
+    background:rgba(0,0,0,0.6);
+    padding:20px;
+    border-radius:15px;
+    transition:0.3s;
+}
+.card:hover{
+    transform:scale(1.05);
+}
+a{
+    text-decoration:none;
+    color:white;
+}
+.button{
+    display:inline-block;
+    margin-top:15px;
+    padding:10px 20px;
+    background:#00ff88;
+    color:black;
+    border-radius:8px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>MzansiVerse Games Portal</h1>
+
+<div class="grid">
+
+<div class="card">
+<h2>Mzansi Snake</h2>
+<p>Earn MzansiPoints. Compete nationally.</p>
+<a href="snake.html"><div class="button">Play</div></a>
+</div>
+
+<div class="card">
+<h2>Coming Soon</h2>
+<p>Mzansi Words</p>
+</div>
+
+<div class="card">
+<h2>Coming Soon</h2>
+<p>Mzansi Memory</p>
+</div>
+
+<div class="card">
+<h2>Coming Soon</h2>
+<p>Mzansi Quiz</p>
+</div>
+
+<div class="card">
+<h2>Coming Soon</h2>
+<p>Mzansi Tap Challenge</p>
+</div>
+
+</div>
+
+</body>
+</html>
