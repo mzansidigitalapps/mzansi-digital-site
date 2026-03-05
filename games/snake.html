@@ -1,63 +1,49 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta charset="UTF-8">
 <title>Mzansi Snake</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<style>
-body{
-margin:0;
-text-align:center;
-font-family:Arial;
-background:#111;
-color:white;
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- Firebase --><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><style>
+body {
+  margin: 0;
+  text-align: center;
+  font-family: Arial;
+  background: linear-gradient(135deg, #111, #002f6c);
+  color: white;
 }
-
-canvas{
-background:#002f6c;
-margin-top:20px;
-border:4px solid #ffcc00;
+canvas {
+  background: #002f6c;
+  margin-top: 20px;
+  border: 4px solid #ffcc00;
+  border-radius: 12px;
 }
-
-button{
-padding:10px 20px;
-margin-top:10px;
-background:#00ff88;
-border:none;
-border-radius:6px;
-font-weight:bold;
+button {
+  padding: 12px 24px;
+  margin-top: 12px;
+  background: #ffcc00;
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
 }
-
-#leaderboard{
-margin-top:20px;
+#leaderboard {
+  margin-top: 20px;
+  background: rgba(0,0,0,0.4);
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 12px;
 }
-</style>
-</head>
-
-<body>
-
-<h1>Mzansi Snake</h1>
+</style></head>
+<body><h1>Mzansi Snake</h1>
 <h3>MzansiPoints: <span id="score">0</span></h3>
-
 <canvas id="game" width="400" height="400"></canvas>
 <br>
-<button onclick="startGame()">Start Game</button>
-
-<div id="leaderboard">
+<button onclick="startGame()">Start Game</button><div id="leaderboard">
 <h3>National Top 10</h3>
 <div id="scores"></div>
-</div>
+</div><script>
 
-<script>
-
-/* FIREBASE CONFIG */
-
+// 🔐 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD6GRgZn-vW8ZwYw3t6twHwmLezU7ybEqE",
   authDomain: "mzansiverse-core.firebaseapp.com",
@@ -68,19 +54,17 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-/* anonymous login */
+// Anonymous login + load leaderboard after login
+auth.signInAnonymously().then(()=>{
+  loadLeaderboard();
+}).catch(console.error);
 
-auth.signInAnonymously().catch(console.error);
-
-/* GAME */
-
+// Game variables
 let canvas = document.getElementById("game");
 let ctx = canvas.getContext("2d");
-
 let box = 20;
 let snake;
 let food;
@@ -89,162 +73,125 @@ let direction;
 let game;
 
 function init(){
-
-snake = [{x:9*box,y:9*box}];
-
-food = {
-x:Math.floor(Math.random()*19)*box,
-y:Math.floor(Math.random()*19)*box
-};
-
-score = 0;
-direction = null;
-
-document.getElementById("score").innerText = score;
-
+  snake = [{x:9*box, y:9*box}];
+  food = {x:Math.floor(Math.random()*19)*box, y:Math.floor(Math.random()*19)*box};
+  score = 0;
+  direction = null;
+  document.getElementById("score").innerText = score;
 }
 
-document.addEventListener("keydown",event=>{
+// Keyboard controls
+document.addEventListener("keydown", event => {
+  if(event.key==="ArrowLeft" && direction!=="RIGHT") direction="LEFT";
+  if(event.key==="ArrowUp" && direction!=="DOWN") direction="UP";
+  if(event.key==="ArrowRight" && direction!=="LEFT") direction="RIGHT";
+  if(event.key==="ArrowDown" && direction!=="UP") direction="DOWN";
+});
 
-if(event.key==="ArrowLeft" && direction!=="RIGHT") direction="LEFT";
-if(event.key==="ArrowUp" && direction!=="DOWN") direction="UP";
-if(event.key==="ArrowRight" && direction!=="LEFT") direction="RIGHT";
-if(event.key==="ArrowDown" && direction!=="UP") direction="DOWN";
-
+// Mobile swipe controls
+let touchStartX=0, touchStartY=0;
+canvas.addEventListener('touchstart', e => {
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+});
+canvas.addEventListener('touchend', e => {
+  let dx=e.changedTouches[0].clientX - touchStartX;
+  let dy=e.changedTouches[0].clientY - touchStartY;
+  if(Math.abs(dx) > Math.abs(dy)) {
+    if(dx>0 && direction!=='LEFT') direction='RIGHT';
+    else if(dx<0 && direction!=='RIGHT') direction='LEFT';
+  } else {
+    if(dy>0 && direction!=='UP') direction='DOWN';
+    else if(dy<0 && direction!=='DOWN') direction='UP';
+  }
 });
 
 function draw(){
+  ctx.clearRect(0,0,400,400);
 
-ctx.clearRect(0,0,400,400);
+  // Draw snake
+  for(let i=0;i<snake.length;i++){
+    ctx.fillStyle = i===0 ? '#ffcc00' : '#00ff88';
+    ctx.fillRect(snake[i].x,snake[i].y,box,box);
+    ctx.strokeStyle='#111';
+    ctx.strokeRect(snake[i].x,snake[i].y,box,box);
+  }
 
-for(let i=0;i<snake.length;i++){
+  // Draw food
+  ctx.fillStyle='red';
+  ctx.fillRect(food.x,food.y,box,box);
+  ctx.strokeStyle='#111';
+  ctx.strokeRect(food.x,food.y,box,box);
 
-ctx.fillStyle = i===0 ? "#ffcc00" : "#00ff88";
-ctx.fillRect(snake[i].x,snake[i].y,box,box);
+  let headX=snake[0].x;
+  let headY=snake[0].y;
 
-}
+  if(direction==='LEFT') headX-=box;
+  if(direction==='UP') headY-=box;
+  if(direction==='RIGHT') headX+=box;
+  if(direction==='DOWN') headY+=box;
 
-ctx.fillStyle="red";
-ctx.fillRect(food.x,food.y,box,box);
+  if(headX===food.x && headY===food.y){
+    score++;
+    document.getElementById('score').innerText=score;
+    food={x:Math.floor(Math.random()*19)*box, y:Math.floor(Math.random()*19)*box};
+  } else {
+    snake.pop();
+  }
 
-let headX = snake[0].x;
-let headY = snake[0].y;
+  let newHead={x:headX,y:headY};
 
-if(direction==="LEFT") headX-=box;
-if(direction==="UP") headY-=box;
-if(direction==="RIGHT") headX+=box;
-if(direction==="DOWN") headY+=box;
+  if(headX<0||headY<0||headX>=400||headY>=400||collision(newHead,snake)){
+    clearInterval(game);
+    saveScore(score);
+    alert('Game Over!');
+    return;
+  }
 
-if(headX===food.x && headY===food.y){
-
-score++;
-
-document.getElementById("score").innerText = score;
-
-food={
-x:Math.floor(Math.random()*19)*box,
-y:Math.floor(Math.random()*19)*box
-};
-
-}else{
-
-snake.pop();
-
-}
-
-let newHead={x:headX,y:headY};
-
-if(headX<0||headY<0||headX>=400||headY>=400||collision(newHead,snake)){
-
-clearInterval(game);
-
-saveScore(score);
-
-alert("Game Over");
-
-return;
-
-}
-
-snake.unshift(newHead);
-
+  snake.unshift(newHead);
 }
 
 function collision(head,array){
-
-for(let i=0;i<array.length;i++){
-
-if(head.x===array[i].x && head.y===array[i].y){
-
-return true;
-
-}
-
-}
-
-return false;
-
+  for(let i=0;i<array.length;i++){
+    if(head.x===array[i].x && head.y===array[i].y) return true;
+  }
+  return false;
 }
 
 function startGame(){
-
-init();
-
-clearInterval(game);
-
-game=setInterval(draw,100);
-
+  init();
+  clearInterval(game);
+  game=setInterval(draw,100);
 }
 
-/* FIREBASE SCORE */
-
+// Save score to Firebase
 function saveScore(points){
-
-auth.onAuthStateChanged(user=>{
-
-if(user){
-
-db.collection("snake_scores").add({
-
-uid:user.uid,
-score:points,
-created:Date.now()
-
-});
-
-loadLeaderboard();
-
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      db.collection('snake_scores').add({
+        uid:user.uid,
+        score:points,
+        created:Date.now()
+      });
+      loadLeaderboard();
+    }
+  });
 }
 
-});
-
-}
-
+// Load leaderboard
 function loadLeaderboard(){
-
-db.collection("snake_scores")
-.orderBy("score","desc")
-.limit(10)
-.get()
-.then(snapshot=>{
-
-let html="";
-
-snapshot.forEach(doc=>{
-
-html+="<div>"+doc.data().score+" points</div>";
-
-});
-
-document.getElementById("scores").innerHTML=html;
-
-});
-
+  db.collection('snake_scores')
+    .orderBy('score','desc')
+    .limit(10)
+    .get()
+    .then(snapshot=>{
+      let html='';
+      snapshot.forEach(doc=>{
+        html+='<div>'+doc.data().score+' points</div>';
+      });
+      document.getElementById('scores').innerHTML=html;
+    });
 }
 
-loadLeaderboard();
-
-</script>
-
-</body>
+</script></body>
 </html>
